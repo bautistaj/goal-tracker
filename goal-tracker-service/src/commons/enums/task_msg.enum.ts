@@ -1,0 +1,7 @@
+export enum TaskMSG {
+  CREATE = 'CREATE_TASK',
+  FIND_ALL = 'FIND_ALL_TASKS',
+  FIND_ONE = 'FIND_ONE_TASK',
+  UPDATE = 'UPDATE_TASK',
+  DELETE = 'DELETE_GOAL',
+}

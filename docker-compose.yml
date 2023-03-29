@@ -1,0 +1,75 @@
+version: '3.3'
+  
+services:
+  goal-tracker-db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=goal-tracker
+      - POSTGRES_USER=goaltracker
+      - POSTGRES_PASSWORD=g0altrack3r
+    ports:
+      - '5434:5432'
+    networks:
+      - goal-tracker-app-network
+    volumes:
+      - goal-tracker-db-volume:/var/lib/postgresql/data
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rmq
+    expose:
+      - 5672
+      - 15672
+    restart: always
+    networks:
+      - goal-tracker-app-network
+
+  goal-tracker-api-gateway: 
+    image: goal-tracker-api-gateway:v1
+    container_name: goal-tracker
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - 91:3000
+    depends_on:
+      - goal-tracker-db
+      - rabbitmq
+    restart: always
+    networks:
+      - goal-tracker-app-network
+
+  goal-tracker-service:
+    image: goal-tracker-service:v1
+    container_name: goal-tracker-service
+    build:
+      context: ./goal-tracker-service
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - goal-tracker-db
+      - rabbitmq
+    restart: always
+    networks:
+      - goal-tracker-app-network
+
+  user-service:
+    image: user-service:v1
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - goal-tracker-db
+      - rabbitmq
+    restart: always
+    networks:
+      - goal-tracker-app-network
+
+volumes:
+  goal-tracker-db-volume:
+
+networks:
+  goal-tracker-app-network:
